@@ -1,7 +1,8 @@
 use clap::Parser;
-use serde::{Deserialize, Serialize};
 use serde_json::Result;
 use std::fs;
+use fftcg_search::model::card::Card;
+use fftcg_search::model::root::Root;
 
 #[derive(Parser)]
 #[clap(name = "fftcg-search", version, author)]
@@ -17,36 +18,6 @@ enum SubCommand {
         name: String
     }
 
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-struct Root {
-    count: u32,
-    cards: Vec<Card>
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-struct Card {
-    #[serde(rename = "Code")]
-    code: String,
-    #[serde(rename = "Cost")]
-    cost: String,
-    #[serde(rename = "Power")]
-    power: String,
-    #[serde(rename = "Category_1")]
-    cat_1: String,
-    #[serde(rename = "Category_2")]
-    cat_2: String,
-    #[serde(rename = "Name_EN")]
-    name: String,
-    #[serde(rename = "Type_EN")]
-    typ: String,
-    #[serde(rename = "Job_EN")]
-    job: String,
-    #[serde(rename = "Text_EN")]
-    text: String,
-    #[serde(rename = "Set")]
-    set: String,
 }
 
 fn main() -> Result<()> {
@@ -88,7 +59,7 @@ fn print_card(card: Card) {
     println!("{} ({})", card.name, card.code);
     println!("Cost: {}", card.cost);
     println!("Power: {}", card.power);
-    println!("Categories: {}, {}", card.cat_1, card.cat_2);
+    println!("Categories: {}, {}", format_text(card.cat_1), format_text(card.cat_2));
     println!("Job: {}", card.job);
     println!("Effect: {}", format_text(card.text));
     println!("---------------------")
@@ -96,4 +67,8 @@ fn print_card(card: Card) {
 
 fn format_text(text: String) -> String {
     text.replace("[[br]]   ", "\n")
+        .replace("[[i]]", "")
+        .replace("[[/]]", "")
+        .replace("&middot;", "-")
+        .replace("[[s]]", "(S)")
 }
