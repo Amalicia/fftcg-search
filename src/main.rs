@@ -1,6 +1,7 @@
 use clap::Parser;
 use serde_json::Result;
 use std::fs;
+use wildmatch::WildMatch;
 use fftcg_search::model::card::Card;
 use fftcg_search::model::root::Root;
 
@@ -15,7 +16,9 @@ struct Opts {
 enum SubCommand {
     SearchByName {
         #[clap(short = 'n', long)]
-        name: String
+        name: String,
+        #[clap(short = 'e', long, default_value = "false")]
+        exact: bool
     }
 
 }
@@ -26,10 +29,12 @@ fn main() -> Result<()> {
 
     match opts.command {
         SubCommand::SearchByName {
-            name
+            name,
+            exact
         } => {
+            let wildcard = if exact { "" } else { "*" };
             cards?.into_iter()
-                .filter(|card| card.name.contains(&name))
+                .filter(|card| WildMatch::new(&format!("{}{}{}", wildcard, name, wildcard)).matches(&card.name))
                 .for_each(print_card);
         }
     }
@@ -71,4 +76,5 @@ fn format_text(text: String) -> String {
         .replace("[[/]]", "")
         .replace("&middot;", "-")
         .replace("[[s]]", "(S)")
+        .replace("《ダル》", "(Tap)")
 }
