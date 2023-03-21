@@ -19,8 +19,15 @@ enum SubCommand {
         name: String,
         #[clap(short = 'e', long, default_value = "false")]
         exact: bool
+    },
+    SearchByJob {
+        #[clap(short = 'j', long)]
+        job: String,
+    },
+    SearchByText {
+        #[clap(short = 't', long)]
+        text: String
     }
-
 }
 
 fn main() -> Result<()> {
@@ -36,6 +43,20 @@ fn main() -> Result<()> {
             cards?.into_iter()
                 .filter(|card| WildMatch::new(&format!("{}{}{}", wildcard, name, wildcard)).matches(&card.name))
                 .for_each(print_card);
+        }
+        SubCommand::SearchByJob {
+            job
+        } => {
+            cards?.into_iter()
+                .filter(|card| WildMatch::new(&job).matches(&card.job))
+                .for_each(print_card);
+        }
+        SubCommand::SearchByText {
+            text
+        } => {
+            cards?.into_iter()
+                .filter(|card| WildMatch::new(&format!("*{}*", text)).matches(&card.text))
+                .for_each(print_card)
         }
     }
 
@@ -76,5 +97,6 @@ fn format_text(text: String) -> String {
         .replace("[[/]]", "")
         .replace("&middot;", "-")
         .replace("[[s]]", "(S)")
+        .replace("[[ex]]", "")
         .replace("《ダル》", "(Tap)")
 }
